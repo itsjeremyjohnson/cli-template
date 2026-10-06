@@ -13,11 +13,6 @@ import (
 	"github.com/builtbyrobben/cli-template/internal/outfmt"
 )
 
-const (
-	colorAuto  = "auto"
-	colorNever = "never"
-)
-
 type RootFlags struct {
 	Color   string `help:"Color output: auto|always|never" default:"${color}"`
 	JSON    bool   `help:"Output JSON to stdout (best for scripting)" default:"${json}"`

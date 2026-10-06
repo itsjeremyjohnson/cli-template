@@ -1,7 +1,10 @@
 package secrets
 
 import (
+	"errors"
 	"testing"
+
+	"github.com/99designs/keyring"
 )
 
 func TestNormalizeKeyringBackend(t *testing.T) {
@@ -75,12 +78,15 @@ func TestAllowedBackends(t *testing.T) {
 				if err == nil {
 					t.Error("expected error, got nil")
 				}
+
 				return
 			}
+
 			if err != nil {
 				t.Errorf("unexpected error: %v", err)
 				return
 			}
+
 			if tt.wantLen == 0 && backends != nil {
 				t.Errorf("expected nil slice, got %d backends", len(backends))
 			} else if tt.wantLen > 0 && len(backends) != tt.wantLen {
@@ -135,5 +141,55 @@ func TestShouldForceFileBackend(t *testing.T) {
 				t.Errorf("shouldForceFileBackend() = %v, want %v", result, tt.want)
 			}
 		})
+	}
+}
+
+type lookupKeyring struct {
+	keyring.Keyring
+	err error
+}
+
+func (r lookupKeyring) Get(_ string) (keyring.Item, error) {
+	return keyring.Item{}, r.err
+}
+
+func TestHasKeyPreservesLookupErrors(t *testing.T) {
+	lookupErr := errors.New("lookup failed")
+	tests := []struct {
+		name string
+		err  error
+		want bool
+	}{
+		{name: "present", want: true},
+		{name: "missing", err: keyring.ErrKeyNotFound},
+		{name: "backend failure", err: lookupErr},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			store := &KeyringStore{ring: lookupKeyring{err: tt.err}}
+			hasKey, err := store.HasKey()
+			if hasKey != tt.want {
+				t.Fatalf("HasKey() = %v, want %v", hasKey, tt.want)
+			}
+
+			if tt.err == lookupErr {
+				if !errors.Is(err, lookupErr) {
+					t.Fatalf("HasKey() error = %v, want wrapped lookup failure", err)
+				}
+			} else if err != nil {
+				t.Fatalf("HasKey() unexpected error: %v", err)
+			}
+		})
+	}
+}
+
+func TestGenericSecretRejectsBlankKey(t *testing.T) {
+	if _, err := GetSecret(" "); !errors.Is(err, errMissingSecretKey) {
+		t.Fatalf("GetSecret() error = %v, want missing secret key", err)
+	}
+
+	if err := SetSecret(" ", []byte("dummy")); !errors.Is(err, errMissingSecretKey) {
+		t.Fatalf("SetSecret() error = %v, want missing secret key", err)
 	}
 }
