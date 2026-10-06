@@ -73,8 +73,8 @@ func (c *Client) Do(ctx context.Context, req Request) (*http.Response, error) {
 	}
 
 	url := c.baseURL + req.Path
-	httpReq, err := http.NewRequestWithContext(ctx, req.Method, url, bodyReader)
 
+	httpReq, err := http.NewRequestWithContext(ctx, req.Method, url, bodyReader)
 	if err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
 	}
