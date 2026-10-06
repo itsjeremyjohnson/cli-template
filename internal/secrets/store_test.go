@@ -144,6 +144,8 @@ func TestShouldForceFileBackend(t *testing.T) {
 	}
 }
 
+var errTestLookupFailed = errors.New("lookup failed")
+
 type lookupKeyring struct {
 	keyring.Keyring
 	err error
@@ -154,7 +156,7 @@ func (r lookupKeyring) Get(_ string) (keyring.Item, error) {
 }
 
 func TestHasKeyPreservesLookupErrors(t *testing.T) {
-	lookupErr := errors.New("lookup failed")
+	lookupErr := errTestLookupFailed
 	tests := []struct {
 		name string
 		err  error
@@ -168,12 +170,13 @@ func TestHasKeyPreservesLookupErrors(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			store := &KeyringStore{ring: lookupKeyring{err: tt.err}}
+
 			hasKey, err := store.HasKey()
 			if hasKey != tt.want {
 				t.Fatalf("HasKey() = %v, want %v", hasKey, tt.want)
 			}
 
-			if tt.err == lookupErr {
+			if errors.Is(tt.err, lookupErr) {
 				if !errors.Is(err, lookupErr) {
 					t.Fatalf("HasKey() error = %v, want wrapped lookup failure", err)
 				}
