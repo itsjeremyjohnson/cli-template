@@ -26,17 +26,17 @@ type KeyringStore struct {
 }
 
 const (
-	apiKeyKey              = "api_key"
-	keyringPasswordEnv     = "PLACEHOLDER_CLI_KEYRING_PASS"
-	keyringBackendEnv      = "PLACEHOLDER_CLI_KEYRING_BACKEND"
-	keyringOpenTimeout     = 5 * time.Second
+	apiKeyKey          = "api_key"
+	keyringPasswordEnv = "PLACEHOLDER_CLI_KEYRING_PASS"
+	keyringBackendEnv  = "PLACEHOLDER_CLI_KEYRING_BACKEND"
+	keyringOpenTimeout = 5 * time.Second
 )
 
 var (
-	errMissingAPIKey      = errors.New("missing API key")
-	errNoTTY              = errors.New("no TTY available for keyring file backend password prompt")
+	errMissingAPIKey         = errors.New("missing API key")
+	errNoTTY                 = errors.New("no TTY available for keyring file backend password prompt")
 	errInvalidKeyringBackend = errors.New("invalid keyring backend")
-	errKeyringTimeout     = errors.New("keyring connection timed out")
+	errKeyringTimeout        = errors.New("keyring connection timed out")
 )
 
 type KeyringBackendInfo struct {
@@ -125,7 +125,7 @@ func openKeyring() (keyring.Keyring, error) {
 	}
 
 	cfg := keyring.Config{
-		ServiceName:             config.AppName,
+		ServiceName:              config.AppName,
 		KeychainTrustApplication: false,
 		AllowedBackends:          backends,
 		FileDir:                  keyringDir,

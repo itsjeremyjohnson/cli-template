@@ -7,20 +7,21 @@ import (
 	"os"
 	"strings"
 
+	"golang.org/x/term"
+
 	"github.com/builtbyrobben/cli-template/internal/outfmt"
 	"github.com/builtbyrobben/cli-template/internal/secrets"
-	"golang.org/x/term"
 )
 
 type AuthCmd struct {
-	SetKey  AuthSetKeyCmd  `cmd:"" help:"Set API key (uses --stdin by default)"`
-	Status  AuthStatusCmd  `cmd:"" help:"Show authentication status"`
-	Remove  AuthRemoveCmd  `cmd:"" help:"Remove stored credentials"`
+	SetKey AuthSetKeyCmd `cmd:"" help:"Set API key (uses --stdin by default)"`
+	Status AuthStatusCmd `cmd:"" help:"Show authentication status"`
+	Remove AuthRemoveCmd `cmd:"" help:"Remove stored credentials"`
 }
 
 type AuthSetKeyCmd struct {
-	Stdin bool `help:"Read API key from stdin (default: true)" default:"true"`
-	Key    string `arg:"" optional:"" help:"API key (discouraged; exposes in shell history)"`
+	Stdin bool   `help:"Read API key from stdin (default: true)" default:"true"`
+	Key   string `arg:"" optional:"" help:"API key (discouraged; exposes in shell history)"`
 }
 
 func (cmd *AuthSetKeyCmd) Run(ctx context.Context) error {
@@ -64,7 +65,7 @@ func (cmd *AuthSetKeyCmd) Run(ctx context.Context) error {
 
 	if outfmt.IsJSON(ctx) {
 		outfmt.WriteJSON(os.Stdout, map[string]string{
-			"status": "success",
+			"status":  "success",
 			"message": "API key stored in keyring",
 		})
 	} else {
@@ -92,8 +93,8 @@ func (cmd *AuthStatusCmd) Run(ctx context.Context) error {
 	envOverride := envKey != ""
 
 	status := map[string]any{
-		"has_key":        hasKey,
-		"env_override":   envOverride,
+		"has_key":         hasKey,
+		"env_override":    envOverride,
 		"storage_backend": "keyring",
 	}
 
@@ -140,7 +141,7 @@ func (cmd *AuthRemoveCmd) Run(ctx context.Context) error {
 
 	if outfmt.IsJSON(ctx) {
 		outfmt.WriteJSON(os.Stdout, map[string]string{
-			"status": "success",
+			"status":  "success",
 			"message": "API key removed",
 		})
 	} else {
