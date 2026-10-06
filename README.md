@@ -70,7 +70,8 @@ placeholder-cli --help
 
 ### Prerequisites
 
-- Go 1.22+
+- Go 1.22+ for the module and build contract; the CI test suite runs on Go 1.25
+- Go 1.25+ for `make tools`, `make fmt`, `make lint`, and `make ci`
 - Make
 
 ### Commands
@@ -82,6 +83,14 @@ make lint         # Run linter
 make ci           # Run full CI suite
 make tools        # Install dev tools
 ```
+
+### CI and template adaptation
+
+Linux runs formatting, linting, and tests with Go 1.25, which the pinned lint tools require. macOS and Windows keep Go 1.22 build and credential smoke coverage; the module's Go 1.22 requirement is unchanged. CI runs on every pull request and on pushes to `main` or this template's current default branch, `feat/initial-template`.
+
+The macOS runner checks native keyring behavior only with an empty store. The write/read/remove smoke uses the supported encrypted file backend with public dummy fixtures and a one-minute timeout. It does not verify native macOS reads of stored credentials. Production keychain trust settings are unchanged.
+
+When adapting the template, keep `cmd/placeholder`, `placeholder-cli`, and the `PLACEHOLDER_CLI_*` environment names in sync in the code, Makefile, and workflow. Keep the explicit backend selection and status assertions so a missing fixture or environment override cannot pass as a successful storage check.
 
 ## License
 
